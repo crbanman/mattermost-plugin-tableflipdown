@@ -7,5 +7,5 @@ var manifest = struct {
 	Version string
 }{
 	ID:      "com.github.crbanman.mattermost-plugin-tableflipdown",
-	Version: "0.1.0",
+	Version: "1.1",
 }

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/pkg/errors"
+
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 )
@@ -36,19 +38,25 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 func (p *Plugin) OnActivate() error {
 	p.enabled = true
 
-	p.API.RegisterCommand(&model.Command{
+	if err := p.API.RegisterCommand(&model.Command{
 		Trigger:          flipTrigger,
 		AutoComplete:     true,
 		AutoCompleteHint: "[message]",
-		AutoCompleteDesc: "Adds " + flipASCII + " to your message",
-	})
+		AutoCompleteDesc: fmt.Sprintf("Adds %s to your message", flipASCII),
+	}); err != nil {
+		return errors.Wrapf(err, "failed to register %s command", flipTrigger)
+	}
 
-	return p.API.RegisterCommand(&model.Command{
+	if err := p.API.RegisterCommand(&model.Command{
 		Trigger:          downTrigger,
 		AutoComplete:     true,
 		AutoCompleteHint: "[message]",
-		AutoCompleteDesc: "Adds " + downASCII + " to your message",
-	})
+		AutoCompleteDesc: fmt.Sprintf("Adds %s to your message", downASCII),
+	}); err != nil {
+		return errors.Wrapf(err, "failed to register %s command", flipTrigger)
+	}
+
+	return nil
 }
 
 // OnDeactivate handles plugin deactivation
@@ -59,41 +67,19 @@ func (p *Plugin) OnDeactivate() error {
 
 // ExecuteCommand handles the core functionality of the plugin
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
+	trigger := strings.TrimPrefix(strings.Fields(args.Command)[0], "/")
+	switch trigger {
+	case flipTrigger:
+		return p.executeCommandTableflip(args), nil
+	case downTrigger:
+		return p.executeCommandTabledown(args), nil
 
-	if !p.enabled {
-		return nil, appError("Cannot execute command while the plugin is disabled.", nil)
-	}
-
-	if p.API == nil {
-		return nil, appError("Cannot access the plugin API.", nil)
-	}
-
-	slashCommand := "/"
-	ascii := ""
-
-	if strings.HasPrefix(args.Command, "/"+flipTrigger) {
-		slashCommand += flipTrigger
-		ascii = flipASCII
-	} else if strings.HasPrefix(args.Command, "/"+downTrigger) {
-		slashCommand += downTrigger
-		ascii = downASCII
-	} else {
-		return nil, appError("Expected trigger "+flipTrigger+" or "+downTrigger+", but got "+args.Command, nil)
-	}
-
-	message := strings.TrimSpace((strings.Replace(args.Command, slashCommand, "", 1)))
-
-	if len(message) == 0 {
+	default:
 		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_IN_CHANNEL,
-			Text:         fmt.Sprintf(ascii),
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf("Unknown command: " + args.Command),
 		}, nil
 	}
-
-	return &model.CommandResponse{
-		ResponseType: model.COMMAND_RESPONSE_TYPE_IN_CHANNEL,
-		Text:         fmt.Sprintf(message + " " + ascii),
-	}, nil
 }
 
 func appError(message string, err error) *model.AppError {
@@ -101,5 +87,29 @@ func appError(message string, err error) *model.AppError {
 	if err != nil {
 		errorMessage = err.Error()
 	}
-	return model.NewAppError("Acro Plugin", message, nil, errorMessage, http.StatusBadRequest)
+	return model.NewAppError("TableFlipDown Plugin", message, nil, errorMessage, http.StatusBadRequest)
+}
+
+func (p *Plugin) executeCommandTableflip(args *model.CommandArgs) *model.CommandResponse {
+	message := strings.TrimSpace((strings.Replace(args.Command, flipTrigger, "", 1)))
+	if len(message) > 0 {
+		message += " "
+	}
+	message += flipASCII
+	return &model.CommandResponse{
+		ResponseType: model.COMMAND_RESPONSE_TYPE_IN_CHANNEL,
+		Text:         message,
+	}
+}
+
+func (p *Plugin) executeCommandTabledown(args *model.CommandArgs) *model.CommandResponse {
+	message := strings.TrimSpace((strings.Replace(args.Command, downTrigger, "", 1)))
+	if len(message) > 0 {
+		message += " "
+	}
+	message += downASCII
+	return &model.CommandResponse{
+		ResponseType: model.COMMAND_RESPONSE_TYPE_IN_CHANNEL,
+		Text:         message,
+	}
 }
