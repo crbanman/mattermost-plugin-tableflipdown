@@ -91,7 +91,7 @@ func appError(message string, err error) *model.AppError {
 }
 
 func (p *Plugin) executeCommandTableflip(args *model.CommandArgs) *model.CommandResponse {
-	message := strings.TrimSpace((strings.Replace(args.Command, flipTrigger, "", 1)))
+	message := strings.TrimSpace((strings.Replace(args.Command, "/"+flipTrigger, "", 1)))
 	if len(message) > 0 {
 		message += " "
 	}
@@ -103,7 +103,7 @@ func (p *Plugin) executeCommandTableflip(args *model.CommandArgs) *model.Command
 }
 
 func (p *Plugin) executeCommandTabledown(args *model.CommandArgs) *model.CommandResponse {
-	message := strings.TrimSpace((strings.Replace(args.Command, downTrigger, "", 1)))
+	message := strings.TrimSpace((strings.Replace(args.Command, "/"+downTrigger, "", 1)))
 	if len(message) > 0 {
 		message += " "
 	}

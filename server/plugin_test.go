@@ -20,6 +20,7 @@ func TestTableFlip(t *testing.T) {
 
 	// Negative tests.
 	assert.False(t, strings.Contains(resp.Text, "┬─┬ノ( º _ ºノ)"))
+	assert.False(t, strings.Contains(resp.Text, "/ (╯°□°)╯︵ ┻━┻"))
 
 	// Positive tests.
 	assert.True(t, strings.Contains(resp.Text, "(╯°□°)╯︵ ┻━┻"))
@@ -35,6 +36,7 @@ func TestTableFlipWithText(t *testing.T) {
 	// Negative tests.
 	assert.False(t, strings.Contains(resp.Text, "┬─┬ノ( º _ ºノ)"))
 	assert.False(t, strings.Contains(resp.Text, "(╯°□°)╯︵ ┻━┻ This is horrible"))
+	assert.False(t, strings.Contains(resp.Text, "/ This is horrible (╯°□°)╯︵ ┻━┻"))
 
 	// Positive tests.
 	assert.True(t, strings.Contains(resp.Text, "This is horrible (╯°□°)╯︵ ┻━┻"))
@@ -49,6 +51,7 @@ func TestTableDown(t *testing.T) {
 
 	// Negative tests.
 	assert.False(t, strings.Contains(resp.Text, "(╯°□°)╯︵ ┻━┻"))
+	assert.False(t, strings.Contains(resp.Text, "/ ┬─┬ノ( º _ ºノ)"))
 
 	// Positive tests.
 	assert.True(t, strings.Contains(resp.Text, "┬─┬ノ( º _ ºノ)"))
@@ -64,6 +67,7 @@ func TestTableDownWithText(t *testing.T) {
 	// Negative tests.
 	assert.False(t, strings.Contains(resp.Text, "(╯°□°)╯︵ ┻━┻"))
 	assert.False(t, strings.Contains(resp.Text, "┬─┬ノ( º _ ºノ) Oh, actually it's fine"))
+	assert.False(t, strings.Contains(resp.Text, "/ Oh, actually it's fine ┬─┬ノ( º _ ºノ)"))
 
 	// Positive tests.
 	assert.True(t, strings.Contains(resp.Text, "Oh, actually it's fine ┬─┬ノ( º _ ºノ)"))
