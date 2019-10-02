@@ -53,7 +53,7 @@ func (p *Plugin) OnActivate() error {
 		AutoCompleteHint: "[message]",
 		AutoCompleteDesc: fmt.Sprintf("Adds %s to your message", downASCII),
 	}); err != nil {
-		return errors.Wrapf(err, "failed to register %s command", flipTrigger)
+		return errors.Wrapf(err, "failed to register %s command", downTrigger)
 	}
 
 	return nil
